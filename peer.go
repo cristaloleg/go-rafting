@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 // Peer represents a peer in Raft consensus.
@@ -53,6 +54,8 @@ func (s *Peer) requestVoteHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Peer) appendEntriesHandler(w http.ResponseWriter, r *http.Request) {
 	dumpRequest(r)
+
+	s.node.lastHeartbeat = time.Now().Unix()
 
 	if s.node.role == "candidate" {
 		s.node.role = "follower"
