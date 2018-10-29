@@ -43,11 +43,21 @@ func (s *Peer) requestVoteHandler(w http.ResponseWriter, r *http.Request) {
 		Term:      s.node.currentTerm,
 		IsGranted: s.node.currentTerm < req.Term,
 	}
+
+	if s.node.currentTerm < req.Term {
+		s.node.currentTerm = req.Term
+	}
+
 	_ = encode(w, resp)
 }
 
 func (s *Peer) appendEntriesHandler(w http.ResponseWriter, r *http.Request) {
 	dumpRequest(r)
+
+	if s.node.role == "candidate" {
+		s.node.role = "follower"
+		return
+	}
 
 	var req = struct {
 		Term int64 `json:"term"`
@@ -65,6 +75,11 @@ func (s *Peer) appendEntriesHandler(w http.ResponseWriter, r *http.Request) {
 		Term:      s.node.currentTerm,
 		IsSuccess: s.node.currentTerm < req.Term,
 	}
+
+	if s.node.currentTerm < req.Term {
+		s.node.currentTerm = req.Term
+	}
+
 	_ = encode(w, resp)
 }
 
